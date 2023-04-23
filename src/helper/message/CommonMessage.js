@@ -12,7 +12,8 @@ const CommonMessage = {
     enter_name: 'Enter name',
     add: 'Add',
     cancel:'Cancel',
-    select_role: 'Select role'
+    select_role: 'Select role',
+    name_required: 'Name is required'
 
 }
 export default CommonMessage;
