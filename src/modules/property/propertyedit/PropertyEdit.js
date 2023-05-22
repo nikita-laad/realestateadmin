@@ -5,11 +5,11 @@ import PropertyEditLogic from "./PropertyEditLogic";
 const PropertyEdit = () => {
 
   // Message
-  const {enter_name, update, cancel, name,} = CommonMessage;
+  const {enter_name, update, cancel, name, status} = CommonMessage;
   const {edit_property, price, location, square_feet, garage, bedrooms, bathrooms, property_realtor, enter_price, enter_location, enter_square_feet, enter_garage, enter_bedrooms, enter_bathrooms, select_property_realtor} = PropertyMessage;
   // End
   const { userLoader,
-    users, loader, errors, handleChange, handleUpdate, formValues, path} = PropertyEditLogic()
+    users, loader, errors, handleChange, handleUpdate, formValues, path, Status} = PropertyEditLogic()
   return (
     <>
       <div className="card shadow mb-4">
@@ -29,7 +29,7 @@ const PropertyEdit = () => {
               <div className="col-lg-6 col-md-6">
                 <div className="form-group mb-2">
                   <label>{price}<span className="text-danger">*</span></label>
-                  <input type="number" className="form-control form-control-user" name="price" placeholder={enter_price} onChange={handleChange} value={formValues.price}/>
+                  <input type="text" className="form-control form-control-user" name="price" placeholder={enter_price} onChange={handleChange} value={formValues.price}/>
                   {errors.price && <label className="text-danger mb-0"> {errors.price}</label>}
                 </div>              
               </div>
@@ -42,32 +42,32 @@ const PropertyEdit = () => {
               <div className="col-lg-6 col-md-6">
                 <div className="form-group mb-2">
                   <label>{square_feet}</label>
-                  <input type="number" className="form-control form-control-user" name="squareFeet" placeholder={enter_square_feet} onChange={handleChange} value={formValues.enter_square_feet}/>
+                  <input type="text" className="form-control form-control-user" name="squareFeet" placeholder={enter_square_feet} onChange={handleChange} value={formValues.squareFeet}/>
                 </div>              
               </div>
               <div className="col-lg-6 col-md-6">
                 <div className="form-group mb-2">
                   <label>{garage}</label>
-                  <input type="number" className="form-control form-control-user" name="garage" placeholder={enter_garage} onChange={handleChange} value={formValues.enter_garage}/>
+                  <input type="text" className="form-control form-control-user" name="garage" placeholder={enter_garage} onChange={handleChange} value={formValues.garage}/>
                 </div>              
               </div>
               <div className="col-lg-6 col-md-6">
                 <div className="form-group mb-2">
                   <label>{bedrooms}</label>
-                  <input type="number" className="form-control form-control-user" name="bedrooms" placeholder={enter_bedrooms} onChange={handleChange} value={formValues.enter_bedrooms}/>
+                  <input type="text" className="form-control form-control-user" name="bedrooms" placeholder={enter_bedrooms} onChange={handleChange} value={formValues.bedrooms}/>
                 </div>              
               </div>
               <div className="col-lg-6 col-md-6">
                 <div className="form-group mb-0">
                   <label>{bathrooms}</label>
-                  <input type="number" className="form-control form-control-user" name="bathrooms" placeholder={enter_bathrooms} onChange={handleChange} value={formValues.enter_bathrooms}/>
+                  <input type="text" className="form-control form-control-user" name="bathrooms" placeholder={enter_bathrooms} onChange={handleChange} value={formValues.bathrooms}/>
                 </div>              
               </div>
               <div className="col-lg-6 col-md-6">
                 <div className="form-group mb-0">
                   <label>{property_realtor}<span className="text-danger">*</span></label>
                   <div className="d-flex align-items-center ">
-                    <select className="form-control" name="propertyRealtor" onChange={handleChange} value={formValues.propertyRealtor._id}>
+                    <select className="form-control" name="propertyRealtor" onChange={handleChange} value={formValues.propertyRealtor !=undefined && formValues.propertyRealtor !=null ? formValues.propertyRealtor._id:''}>
                       <option>{select_property_realtor}</option>
                       {users && users.length>0 ?
                       users.map((user)=>(
@@ -81,6 +81,13 @@ const PropertyEdit = () => {
                   
                   {errors.propertyRealtor && <label className="text-danger mb-0"> {errors.propertyRealtor}</label>}
                 </div>              
+              </div>
+              <div className="col-lg-6 col-md-6">
+                  <div className="form-group mb-0">
+                    <label>{status}<span className="text-danger">*</span></label>
+                    <Status handleChange={handleChange} value={formValues.status}/>
+                    {errors.status && <label className="text-danger mb-0"> {errors.status}</label>}
+                  </div>              
               </div>
             </div>
           </div>

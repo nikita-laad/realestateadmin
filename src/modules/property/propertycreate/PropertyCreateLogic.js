@@ -1,28 +1,28 @@
-import MessageContext from "../../../components/message/context/MessageContext";
-import CommonMessage from "../../../helper/message/CommonMessage";
-import { propertiesValidaions } from "../PropertyValidations";
+import createAPI from "../../../api/Api";
+import {useNavigate} from "react-router-dom";
+import Status from "../../../components/status/Status";
+import LogOutLogic from "../../../helper/auth/LogOutLogic";
 import { useContext, useEffect, useState } from "react";
-import {  useNavigate } from "react-router-dom";
-import api from "../../../api/Api";
+import { propertiesValidaions } from "../PropertyValidations";
+import CommonMessage from "../../../helper/message/CommonMessage";
+import { LIMIT, ORDERBY, STATUSCODE } from "../../../helper/Constent";
+import MessageContext from "../../../components/message/context/MessageContext";
+
 const PropertyCreateLogic = () => {
+  const {logOut} = LogOutLogic();//Logout
+  // Api
+  const apiCreator = createAPI();
+  const api = apiCreator(); 
+  // End
   // Base path
   const path = '/properties';
   const userPath = '/users';
   // End
-  // Redirect url
-  const navigate = useNavigate();
-  // End
-
+  const navigate = useNavigate();// Redirect url
   const {showMessage} = useContext(MessageContext);//Show message
-
-  //Messages 
-  const { danger, success} = CommonMessage;
-  // End
-  
+  const { danger, success} = CommonMessage; //Messages 
   const [userLoader, setUserLoader] = useState(false);//Loader
-
   const [users, setUsers] = useState([]); //User loader
-
   // Get user
   useEffect(()=>{
     getUsers();
@@ -32,21 +32,45 @@ const PropertyCreateLogic = () => {
   const getUsers = async() =>{
     setUserLoader(true);
     try {
-      const res = await api.get(`${userPath}?roleName=propertyrealtor`)
+      const body = {
+        searchTerm: '',
+        sortColumn: ORDERBY.CREATEDAT, 
+        sortDirection: ORDERBY.DESC, 
+        page: '',
+        perPage: '',
+        roleName: 'propertyrealtor',
+        onlyActive: LIMIT.ITEMONE,
+        status: ''
+      };
+      const res = await api.post(userPath, body)
       const resData = res.data;
       if(resData.status === true){
-        setUserLoader(false);
         setUsers(resData.users)
+      }else if(resData.status === false){
+        showMessage({
+          message: resData.message,
+          type: danger
+        });
+      }else {
+        showMessage({
+          message: resData.message,
+          type: danger
+        });
       }
     } catch (error) {
-      setUserLoader(false)
-      const message = error.response.data.message;
-        showMessage({
-            message: message,
-            type: danger
-        });
+      const errorResponse = error.response.data;
+      if(errorResponse.status=== STATUSCODE.UNAUTHENTICATED){
+          logOut();
+      }
+      const message = errorResponse.message;
+      showMessage({
+          message:message,
+          type: danger
+      });
+    }finally{
+        setUserLoader(false)
+      }
     }
-  }
   // End
 
   // Form value
@@ -59,7 +83,8 @@ const PropertyCreateLogic = () => {
     garage: '',
     bedrooms: '',
     bathrooms: '',
-    propertyRealtor: ''
+    propertyRealtor: '',
+    status: LIMIT.ITEMONE
   }
   const [formValues, setFormValues] = useState(intialValues);
   const [errors, setErrors] = useState({});//Error
@@ -67,7 +92,17 @@ const PropertyCreateLogic = () => {
 
   // Input change
   const handleChange = (e) =>{
-    const{name, value} = e.target;
+    let {name, value} = e.target;
+    if (name === 'price' || name ==='squareFeet') {
+      // restrict input to only numbers for the 'mobile' field
+      const regex = /[^0-9.]/g; // match anything that's not a digit
+      value = value.replace(regex, ''); // update the value variable with the filtered value
+    }
+    if(name === 'garage' || name ==='bedrooms' || name === 'bathrooms'){
+      // restrict input to only numbers for the 'mobile' field
+      const regex = /[^0-9]/g;  // match anything that's not a digit
+      value = value.replace(regex, ''); // update the value variable with the filtered value
+    }
     setFormValues({...formValues, [name]: value});
     if (Object.keys(errors).length > 0) {
       setErrors({ ...errors, [name]: '' });
@@ -80,8 +115,8 @@ const PropertyCreateLogic = () => {
     const errors = propertiesValidaions(formValues);
     setErrors(errors);
     if(Object.keys(errors).length ===0){
-      const {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor } = formValues;
-      const properties = {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor}
+      const {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor, status } = formValues;
+      const properties = {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor, status}
       addProperty(properties);
     }
   }
@@ -90,38 +125,42 @@ const PropertyCreateLogic = () => {
   const addProperty = async(formValues) => {
     setLoader(true);
     try {
-      const res = await api.post(path, formValues)
+      const res = await api.post(`${path}/create`, formValues)
       const resData = res.data;
       if(resData.status === true){
-        setLoader(false);
         showMessage({
           message: resData.message,
           type: success
         });
         navigate(path);
+      }else if(resData.status === false){
+        showMessage({
+          message: resData.message,
+          type: danger
+        });
+      }else{
+        showMessage({
+          message: resData.message,
+          type: danger
+        });
       }
       
     } catch (error) {
-      setLoader(false);
-      const message = error.response.data.message;
+      const errorResponse = error.response.data;
+      if(errorResponse.status=== STATUSCODE.UNAUTHENTICATED){
+          logOut();
+      }
+      const message = errorResponse.message;
       showMessage({
-        message: message,
-        type: danger
+          message:message,
+          type: danger
       });
+    }finally{
+        setLoader(false);
+      }
     }
-  }
   // End
-  return {
-    path,
-    userLoader,
-    loader,
-    errors,
-    handleSubmit,
-    handleChange,
-    users,
-    path
-  }
+  return { handleSubmit, handleChange, Status, userLoader, loader, errors, users, path, formValues}
 }
-
-export default PropertyCreateLogic
+export default PropertyCreateLogic;
 

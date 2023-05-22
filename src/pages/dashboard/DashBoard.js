@@ -1,47 +1,13 @@
-import { Link } from "react-router-dom"
-import PageHeading from "../../components/pageheading/PageHeading"
-import { useContext, useEffect, useState } from "react"
-import MessageContext from "../../components/message/context/MessageContext";
-import api from '../../api/Api';
+import {Link} from "react-router-dom"
+import DashBoardLogic from "./DashBoardLogic";
+import Spinner from '../../components/spinner/Spinner'
 import CommonMessage from '../../helper/message/CommonMessage';
 const DashBoard = () => {
-    const path = '/counts';//url
-    const {showMessage} = useContext(MessageContext);  //show message
-    const {danger, users, properties} = CommonMessage
-    // DashBoard Count
-    const intialCount = {
-        propertiesCount: 0,
-        usersCount: 0
-    }
-    const [allCounts, setAllCount] = useState(intialCount);//Get dashboard count
-    const [loader, setLoader] = useState(false);//Loader
-    useEffect(()=>{
-        getCount();
-    }, [])
-    // Get count
-    const getCount = async() =>{
-        setLoader(true);
-        try {
-          const res = await api.get(path)
-          const resData = res.data;
-          if(resData.status === true){
-            setLoader(false);
-            setAllCount(resData.allCount);
-          }
-        } catch (error) {
-          setLoader(false)
-          const message = error.response.data.message;
-            showMessage({
-                message: message,
-                type: danger
-            });
-        }
-    }
-
-    // End
+    const { users, properties} = CommonMessage; //Message
+    const {allCounts, loader} = DashBoardLogic();//Logic
   return (
     <div>
-        <PageHeading heading='Dashboard'/>
+        {loader && <Spinner/>}
         <div className="row">
             <div className="col-xl-3 col-md-6 mb-4">
                 <Link to={'/users'}>
@@ -59,8 +25,7 @@ const DashBoard = () => {
                             </div>
                         </div>
                     </div>
-                </Link>
-                
+                </Link> 
             </div>
             <div className="col-xl-3 col-md-6 mb-4">
                 <Link to={'/properties'}>
@@ -84,5 +49,4 @@ const DashBoard = () => {
     </div>
   )
 }
-
-export default DashBoard
+export default DashBoard;
