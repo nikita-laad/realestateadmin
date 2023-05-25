@@ -6,15 +6,13 @@ import Spinner from '../../../components/spinner/Spinner';
 import UserMessage from '../UserMessage';
 import { Link } from 'react-router-dom';
 import UsersListLogic from './UsersListLogic';
-
 const UsersList = () => {
     // Message 
-     const {name, created_at, action, add, role, users, status, search} = CommonMessage;
-    const {email, mobile} = UserMessage;
+     const {name, created_at, action, add, role, users, status, search, mobile, email} = CommonMessage;
     // End
     //Logic function
     const { handleDelete, areUSureDelete, Pagination, seach, current, handleSort, handleNextPage, handlePreviousPage, statusSearch, Status,
-        deleteLoader, dialog, loader, allUsers, path, page, perPage, searchTerm, totalPages,} = UsersListLogic();
+        deleteLoader, dialog, loader, allUsers, path, page, perPage, searchTerm, totalPages,currentStatus, getStatus} = UsersListLogic();
     // End   
     return (
     <>
@@ -31,7 +29,7 @@ const UsersList = () => {
             <div className='row justify-content-end mb-3'>
                 <div className='col-lg-4 col-md-2 col-12'>
                 <div className='d-flex'>
-                    <Status handleChange={statusSearch} value=''/>
+                    <Status handleChange={statusSearch} value={currentStatus} data={getStatus}/>
                     <input type="text" placeholder={search} className='form-control ml-2' value={searchTerm} onChange={seach}/>
                 </div>
                 

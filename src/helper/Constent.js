@@ -16,3 +16,10 @@ export const STATUS = [
 export const STATUSCODE={
     UNAUTHENTICATED:401
 };
+export const STATUSREAD = [
+    {id: true, name: 'Read'},
+    {id: false, name: 'Unread'}
+];
+export const ROLENAME={
+    REALTOR: "realtor"
+}

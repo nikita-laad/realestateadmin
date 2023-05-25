@@ -3,34 +3,33 @@ import {useNavigate} from "react-router-dom";
 import Status from "../../../components/status/Status";
 import LogOutLogic from "../../../helper/auth/LogOutLogic";
 import { useContext, useEffect, useState } from "react";
-import { propertiesValidaions } from "../PropertyValidations";
 import CommonMessage from "../../../helper/message/CommonMessage";
-import { LIMIT, ORDERBY, ROLENAME, STATUSCODE } from "../../../helper/Constent";
+import { LIMIT, ORDERBY, STATUSCODE } from "../../../helper/Constent";
 import MessageContext from "../../../components/message/context/MessageContext";
+import { inquiryValidaions } from "../InquiryValidations";
 
-const PropertyCreateLogic = () => {
+const InquiryCreateLogic = () => {
   const {logOut} = LogOutLogic();//Logout
   // Api
   const apiCreator = createAPI();
   const api = apiCreator(); 
   // End
   // Base path
-  const path = '/properties';
-  const userPath = '/users';
+  const path = '/inquiries';
   // End
   const navigate = useNavigate();// Redirect url
   const {showMessage} = useContext(MessageContext);//Show message
   const { danger, success} = CommonMessage; //Messages 
-  const [userLoader, setUserLoader] = useState(false);//Loader
-  const [users, setUsers] = useState([]); //User loader
+  const [propertyLoader, setPropertyLoader] = useState(false);//Loader
+  const [properties, setProperties] = useState([]); //User loader
   // Get user
   useEffect(()=>{
-    getUsers();
+    getProperties();
   },[]);
   // End
   // Get user api
-  const getUsers = async() =>{
-    setUserLoader(true);
+  const getProperties = async() =>{
+    setPropertyLoader(true);
     try {
       const body = {
         searchTerm: '',
@@ -38,14 +37,13 @@ const PropertyCreateLogic = () => {
         sortDirection: ORDERBY.DESC, 
         page: '',
         perPage: '',
-        roleName: ROLENAME.REALTOR,
         onlyActive: LIMIT.ITEMONE,
         status: ''
       };
-      const res = await api.post(userPath, body)
+      const res = await api.post('/properties', body)
       const resData = res.data;
       if(resData.status === true){
-        setUsers(resData.users)
+        setProperties(resData.properties)
       }else if(resData.status === false){
         showMessage({
           message: resData.message,
@@ -68,25 +66,19 @@ const PropertyCreateLogic = () => {
           type: danger
       });
     }finally{
-        setUserLoader(false)
-      }
+      setPropertyLoader(false)
     }
+  }
   // End
 
   // Form value
   const [loader, setLoader] = useState(false);//Form loader
   const intialValues = {
     name: '',
-    price: '',
-    location: '',
-    squareFeet: '',
-    garage: '',
-    bedrooms: '',
-    bathrooms: '',
-    propertyRealtor: '',
-    description:'',
-    status: LIMIT.ITEMONE,
-    
+    email: '',
+    mobile: '',
+    message: '',
+    property: ''
   }
   const [formValues, setFormValues] = useState(intialValues);
   const [errors, setErrors] = useState({});//Error
@@ -95,14 +87,9 @@ const PropertyCreateLogic = () => {
   // Input change
   const handleChange = (e) =>{
     let {name, value} = e.target;
-    if (name === 'price' || name ==='squareFeet') {
+    if (name === 'mobile') {
       // restrict input to only numbers for the 'mobile' field
-      const regex = /[^0-9.]/g; // match anything that's not a digit
-      value = value.replace(regex, ''); // update the value variable with the filtered value
-    }
-    if(name === 'garage' || name ==='bedrooms' || name === 'bathrooms'){
-      // restrict input to only numbers for the 'mobile' field
-      const regex = /[^0-9]/g;  // match anything that's not a digit
+      const regex = /[^0-9]/g; // match anything that's not a digit
       value = value.replace(regex, ''); // update the value variable with the filtered value
     }
     setFormValues({...formValues, [name]: value});
@@ -114,18 +101,17 @@ const PropertyCreateLogic = () => {
   // Submit Form
   const handleSubmit = (e) =>{
     e.preventDefault();
-    console.log(formValues,"::::")
-    const errors = propertiesValidaions(formValues);
+    const errors = inquiryValidaions(formValues);
     setErrors(errors);
     if(Object.keys(errors).length ===0){
-      const {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor, status, description } = formValues;
-      const properties = {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor, status, description}
-      addProperty(properties);
+      const {name, email, mobile, message, property} = formValues;
+      const inquiry = {name, email, mobile, message, property}
+      addInquiry(inquiry);
     }
   }
   // End
   // Add property api
-  const addProperty = async(formValues) => {
+  const addInquiry = async(formValues) => {
     setLoader(true);
     try {
       const res = await api.post(`${path}/create`, formValues)
@@ -163,7 +149,8 @@ const PropertyCreateLogic = () => {
       }
     }
   // End
-  return { handleSubmit, handleChange, Status, userLoader, loader, errors, users, path, formValues}
+  return { handleSubmit, handleChange, Status, propertyLoader, loader, errors, properties, path, formValues}
 }
-export default PropertyCreateLogic;
+export default InquiryCreateLogic;
+
 

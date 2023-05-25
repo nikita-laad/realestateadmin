@@ -2,18 +2,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import CommonMessage from "../../../helper/message/CommonMessage";
 import { useContext, useEffect, useState } from "react";
 import MessageContext from "../../../components/message/context/MessageContext";
-import { propertiesValidaions } from "../PropertyValidations";
 import createAPI from '../../../api/Api'
 import Status from "../../../components/status/Status";
-import { LIMIT, ORDERBY, ROLENAME, STATUSCODE } from "../../../helper/Constent";
+import { LIMIT, ORDERBY, STATUSCODE } from "../../../helper/Constent";
 import LogOutLogic from '../../../helper/auth/LogOutLogic'
-const PropertyEditLogic = () => {
+import { inquiryValidaions } from "../InquiryValidations";
+const InquiryEditLogic = () => {
   const {logOut} = LogOutLogic();
   const apiCreator = createAPI();
   const api = apiCreator(); 
   // Base path
-  const path = '/properties';
-  const userPath = '/users';
+  const path = '/inquiries';
   // End
 
   // Redirect url
@@ -28,19 +27,20 @@ const PropertyEditLogic = () => {
   const {danger, success} = CommonMessage;
   // End
 
-  const [userLoader, setUserLoader] = useState(false);//Loader
-  const [users, setUsers] = useState([]); //User loader
+  const [propertyLoader, setPropertyLoader] = useState(false);//Loader
+  const [properties, setProperties] = useState([]); //User loader
 
   // Get role
   useEffect(()=>{
-    getUsers();
-    getProperty(id);
+    getProperty();
+    getInquiry(id);
+    
   },[])
   // End
 
   // Get user api
-  const getUsers = async() =>{
-    setUserLoader(true);
+  const getProperty = async() =>{
+    setPropertyLoader(true);
     try {
       const body = {
         searchTerm: '',
@@ -48,14 +48,13 @@ const PropertyEditLogic = () => {
         sortDirection: ORDERBY.DESC, 
         page: '',
         perPage: '',
-        roleName: ROLENAME.REALTOR,
         onlyActive: LIMIT.ITEMONE,
         status: ''
       };
-      const res = await api.post(userPath, body)
+      const res = await api.post('/properties', body)
       const resData = res.data;
       if(resData.status === true){
-        setUsers(resData.users)
+        setProperties(resData.properties)
       }else if(resData.status === false){
         showMessage({
           message: resData.message,
@@ -77,21 +76,21 @@ const PropertyEditLogic = () => {
           message:message,
           type: danger
       });
-  }finally{
-      setUserLoader(false)
+    }finally{
+      setPropertyLoader(false)
     }
   }
   // End
 
    // Get property
    const [loader, setLoader] = useState(false);//Loader
-   const getProperty = async(propertyId) =>{
+   const getInquiry = async(inquiryId) =>{
     setLoader(true);
     try {
-      const res = await api.get(`${path}/${propertyId}`)
+      const res = await api.get(`${path}/${inquiryId}`)
       const resData = res.data;
       if(resData.status === true){
-        setFormValues(resData.property)
+        setFormValues(resData.inquiry)
       }else if(resData.status === true){
         showMessage({
           message:resData.message,
@@ -122,15 +121,10 @@ const PropertyEditLogic = () => {
   // Form value
   const intialValues = {
     name: '',
-    price: '',
-    location: '',
-    squareFeet: '',
-    garage: '',
-    bedrooms: '',
-    bathrooms: '',
-    propertyRealtor: '',
-    status:'',
-    description:''
+    email: '',
+    mobile: '',
+    message: '',
+    property: ''
   }
   const [formValues, setFormValues] = useState(intialValues);
   const [errors, setErrors] = useState({});//Error
@@ -138,14 +132,9 @@ const PropertyEditLogic = () => {
   // Input change
   const handleChange = (e) =>{
     let {name, value} = e.target;
-    if (name === 'price' || name ==='squareFeet') {
+    if (name === 'mobile') {
       // restrict input to only numbers for the 'mobile' field
-      const regex = /[^0-9.]/g; // match anything that's not a digit
-      value = value.replace(regex, ''); // update the value variable with the filtered value
-    }
-    if(name === 'garage' || name ==='bedrooms' || name === 'bathrooms'){
-      // restrict input to only numbers for the 'mobile' field
-      const regex = /[^0-9]/g;  // match anything that's not a digit
+      const regex = /[^0-9]/g; // match anything that's not a digit
       value = value.replace(regex, ''); // update the value variable with the filtered value
     }
     setFormValues({...formValues, [name]: value});
@@ -157,18 +146,17 @@ const PropertyEditLogic = () => {
   // Submit Form
   const handleUpdate = (e) =>{
     e.preventDefault();
-    const errors = propertiesValidaions(formValues);
+    const errors = inquiryValidaions(formValues);
     setErrors(errors);
     if(Object.keys(errors).length ===0){
-      const {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor, status, description } = formValues;
-      const properties = {name, price, location, squareFeet, garage, bedrooms, bathrooms, propertyRealtor, status, description}
-      console.log(properties)
-      updateProperty(properties);
+      const {name, email, mobile, message, property} = formValues;
+      const inquiry = {name, email, mobile, message, property}
+      updateInquiry(inquiry);
     }
   }
   // End
   // Update property api
-  const updateProperty = async(formValues) => {
+  const updateInquiry = async(formValues) => {
     setLoader(true);
     try {
       const res = await api.put(`${path}/${id}`, formValues)
@@ -207,8 +195,8 @@ const PropertyEditLogic = () => {
   }
   // End
   return {
-    userLoader,
-    users,
+    propertyLoader,
+    properties,
     loader,
     errors,
     handleChange,
@@ -219,4 +207,5 @@ const PropertyEditLogic = () => {
   }
 }
 
-export default PropertyEditLogic;
+export default InquiryEditLogic;
+
